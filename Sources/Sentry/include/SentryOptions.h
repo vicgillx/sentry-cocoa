@@ -23,14 +23,12 @@ SENTRY_NO_INIT
 @property(nonatomic, strong) SentryDsn *dsn;
 
 /**
- * debug [mode] sets a more verbose log level. Default is @NO. If set to @YES sentry prints more log messages to the console.
+ * debug [mode] enables the SDK logging. Default is @NO. If set to @YES sentry prints log messages to the console.
  */
 @property(nonatomic, copy) NSNumber *debug;
 
 /**
- DEPRECATED: use debug bool instead (debug = @YES maps to logLevel kSentryLogLevelError, debug = @NO maps to loglevel kSentryLogLevelError).
-             thus kSentryLogLevelNone and kSentryLogLevelDebug will be dropped entirely.
- defines the log level of sentry log (console output).
+ * When debug = @YES, this option configures the minimum level to log.
  */
 @property(nonatomic, assign) SentryLogLevel logLevel;
 

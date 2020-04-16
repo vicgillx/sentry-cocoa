@@ -6,7 +6,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SentryLog : NSObject
 
-+ (void)logWithMessage:(NSString *)message andLevel:(SentryLogLevel)level;
+- (instancetype)initWithMinLevel:(SentryLogLevel)minLevel;
+- (void)logWithMessage:(NSString *)message andLevel:(SentryLogLevel)level;
 
 @end
 

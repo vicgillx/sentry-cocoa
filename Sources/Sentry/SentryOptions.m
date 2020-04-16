@@ -43,11 +43,12 @@
         // In other SDKs there's debug=true + diagnosticLevel where we can control how chatty the SDK is.
         // Ideally we'd support all the levels here, and perhaps name it `diagnosticLevel` to align more.
         if ([@"verbose" isEqual:[options objectForKey:@"logLevel"]]) {
-            SentrySDK.logLevel = kSentryLogLevelVerbose;
+            self.logLevel = kSentryLogLevelVerbose;
+        } else {
+            self.logLevel = kSentryLogLevelDebug;
         }
-        SentrySDK.logLevel = kSentryLogLevelDebug;
     } else {
-        SentrySDK.logLevel = kSentryLogLevelError;
+        self.logLevel = kSentryLogLevelError;
     }
     
     if (nil == [options valueForKey:@"dsn"] || ![[options valueForKey:@"dsn"] isKindOfClass:[NSString class]]) {

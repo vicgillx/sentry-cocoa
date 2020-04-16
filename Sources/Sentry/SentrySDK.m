@@ -8,8 +8,6 @@
 #import "SentryBreadcrumbTracker.h"
 #import "SentryLog.h"
 
-static SentryLogLevel logLevel = kSentryLogLevelError;
-
 @interface SentrySDK ()
 
 /**
@@ -23,8 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 @implementation SentrySDK
 
 static SentryHub *currentHub;
-
-@dynamic logLevel;
 
 + (SentryHub *)currentHub {
     @synchronized(self) {
@@ -123,15 +119,6 @@ static SentryHub *currentHub;
 
 + (void)configureScope:(void(^)(SentryScope *scope))callback {
     [SentrySDK.currentHub configureScope:callback];
-}
-
-+ (void)setLogLevel:(SentryLogLevel)level {
-    NSParameterAssert(level);
-    logLevel = level;
-}
-
-+ (SentryLogLevel)logLevel {
-    return logLevel;
 }
 
 #ifndef __clang_analyzer__

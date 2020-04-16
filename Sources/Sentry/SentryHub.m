@@ -31,6 +31,7 @@
 }
 
 - (void)startSession {
+    [SentryLog logWithMessage:[NSString stringWithFormat:@"Starting session."] andLevel:kSentryLogLevelDebug];
     SentrySession *lastSession = nil;
     SentryScope *scope = [self getScope];
     @synchronized (_sessionLock) {
@@ -56,7 +57,7 @@
     }
     
     if (nil == currentSession) {
-        // TODO: log
+        [SentryLog logWithMessage:[NSString stringWithFormat:@"No session to end."] andLevel:kSentryLogLevelDebug];
         return;
     }
 
@@ -73,7 +74,7 @@
     }
     
     if (nil == currentSession) {
-        // TODO: log
+        [SentryLog logWithMessage:[NSString stringWithFormat:@"No session to end with timestamp."] andLevel:kSentryLogLevelDebug];
         return;
     }
 
@@ -96,12 +97,17 @@
         if (nil != session && nil != client) { // Make sure there's a client bound.
             NSDate *timestamp = [NSDate date];
             if (SentryCrash.sharedInstance.crashedLastLaunch) {
+                [SentryLog logWithMessage:[NSString stringWithFormat:@"Closing previous session as crashed."] andLevel:kSentryLogLevelDebug];
                 [session crashedSession];
+            } else {
+                [SentryLog logWithMessage:[NSString stringWithFormat:@"Last session did not crash."] andLevel:kSentryLogLevelDebug];
             }
             [session endSessionWithTimestamp:timestamp];
             [self deleteCurrentSession];
             [client captureSession:session];
         }
+    } else {
+        [SentryLog logWithMessage:[NSString stringWithFormat:@"No cached session to close."] andLevel:kSentryLogLevelDebug];
     }
 }
 

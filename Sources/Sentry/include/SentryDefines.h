@@ -53,15 +53,6 @@ typedef SentryEvent *_Nullable (^SentryBeforeSendEventCallback)(SentryEvent *_No
  * Once it has been queued once it will be discarded if it fails again.
  */
 typedef BOOL (^SentryShouldQueueEvent)(SentryEnvelope *_Nullable envelope, NSHTTPURLResponse *_Nullable response, NSError *_Nullable error);
-/**
- * Loglevel
- */
-typedef NS_ENUM(NSInteger, SentryLogLevel) {
-    kSentryLogLevelNone = 1,
-    kSentryLogLevelError,
-    kSentryLogLevelDebug,
-    kSentryLogLevelVerbose
-};
 
 /**
  * Sentry level

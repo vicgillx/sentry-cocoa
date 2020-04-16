@@ -4,14 +4,29 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface SentryLog ()
+
+@property(readonly, nonatomic, assign) SentryLogLevel logLevel;
+
+@end
+
 @implementation SentryLog
 
-+ (void)logWithMessage:(NSString *)message andLevel:(SentryLogLevel)level {
+
+- (instancetype)initWithMinLevel:(SentryLogLevel)minLevel {
+    self = [super init];
+    if (self) {
+        _logLevel = minLevel;
+    }
+    return self;
+}
+
+- (void)logWithMessage:(NSString *)message andLevel:(SentryLogLevel)level {
     SentryLogLevel defaultLevel = kSentryLogLevelError;
-    if (SentrySDK.logLevel > 0) {
+    if (_logLevel > 0) {
         defaultLevel = SentrySDK.logLevel;
     }
-    if (level <= defaultLevel && level != kSentryLogLevelNone) {
+    if (_logLevel <= defaultLevel && _logLevel != kSentryLogLevelNone) {
         NSLog(@"Sentry - %@:: %@", [self.class logLevelToString:level], message);
     }
 }

@@ -22,7 +22,7 @@ NSTimeInterval const SentryRequestTimeout = 15;
 
 @implementation SentryNSURLRequest
 
-- (_Nullable instancetype)initStoreRequestWithDsn:(SentryDsn *)dsn
+- (_Nullable instancetype)  initStoreRequestWithDsn:(SentryDsn *)dsn
                                          andEvent:(SentryEvent *)event
                                  didFailWithError:(NSError *_Nullable *_Nullable)error {
     NSData *jsonData;
