@@ -35,6 +35,8 @@
 #import "SentryTransportFactory.h"
 #import "SentryUser.h"
 #import "SentryUserFeedback.h"
+#import "SentryCrash.h"
+#import <mach/mach.h>
 
 #if SENTRY_HAS_UIKIT
 #    import <UIKit/UIKit.h>
@@ -342,12 +344,30 @@ NSString *const DropSessionLogMessage = @"Session has no release name. Won't sen
                   isCrashEvent:NO];
 }
 
+void report_memory(void) {
+    struct mach_task_basic_info info;
+    mach_msg_type_number_t size = MACH_TASK_BASIC_INFO_COUNT;
+    kern_return_t kerr = task_info(mach_task_self(),
+                                   MACH_TASK_BASIC_INFO,
+                                   (task_info_t)&info,
+                                   &size);
+    
+  if( kerr == KERN_SUCCESS ) {
+    NSLog(@"Memoryi resident in use (in MiB): %f", ((CGFloat)info.resident_size / 1048576));
+  } else {
+    NSLog(@"Error with task_info(): %s", mach_error_string(kerr));
+  }
+}
+
 - (SentryEvent *_Nullable)prepareEvent:(SentryEvent *)event
                              withScope:(SentryScope *)scope
                 alwaysAttachStacktrace:(BOOL)alwaysAttachStacktrace
                           isCrashEvent:(BOOL)isCrashEvent
 {
     NSParameterAssert(event);
+        
+    report_memory();
+    
     if ([self isDisabled]) {
         [self logDisabledMessage];
         return nil;

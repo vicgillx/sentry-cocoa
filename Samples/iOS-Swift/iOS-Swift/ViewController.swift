@@ -2,6 +2,8 @@ import Sentry
 import UIKit
 
 class ViewController: UIViewController {
+    
+    private var array = ["hello"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,6 +38,10 @@ class ViewController: UIViewController {
     }
     
     @IBAction func captureMessage(_ sender: Any) {
+        for i in 0...10000 {
+            array.append("hello \(i)")
+        }
+        
         let eventId = SentrySDK.capture(message: "Yeah captured a message")
         // Returns eventId in case of successfull processed event
         // otherwise nil
