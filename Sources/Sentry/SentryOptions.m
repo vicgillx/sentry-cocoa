@@ -20,7 +20,7 @@ SentryOptions ()
 {
     return @[
         @"SentryCrashIntegration", @"SentryAutoBreadcrumbTrackingIntegration",
-        @"SentryAutoSessionTrackingIntegration", @"SentryOutOfMemoryTrackingIntegration"
+        @"SentryAutoSessionTrackingIntegration", @"SentryOutOfMemoryTrackingIntegration", @"SentryAppStartTrackingIntegration"
     ];
 }
 

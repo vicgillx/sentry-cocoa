@@ -19,6 +19,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 static SentryHub *currentHub;
 static BOOL crashedLastRunCalled;
+static NSDate *sdkStart = nil;
+
++ (NSDate *)getSdkStart {
+    return sdkStart;
+}
 
 + (SentryHub *)currentHub
 {
@@ -77,6 +82,7 @@ static BOOL crashedLastRunCalled;
     [SentryLog logWithMessage:[NSString stringWithFormat:@"SDK initialized! Version: %@",
                                         SentryMeta.versionString]
                      andLevel:kSentryLevelDebug];
+    sdkStart = [[NSDate alloc] init];
     [SentrySDK installIntegrations];
 }
 
