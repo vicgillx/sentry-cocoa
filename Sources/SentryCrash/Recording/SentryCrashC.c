@@ -49,6 +49,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "SentrySDKc.h"
+
 // ============================================================================
 #pragma mark - Globals -
 // ============================================================================
@@ -92,6 +94,8 @@ printPreviousLog(const char *filePath)
 static void
 onCrash(struct SentryCrash_MonitorContext *monitorContext)
 {
+    sentrycrash_serializeScope();
+
     if (monitorContext->currentSnapshotUserReported == false) {
         SentryCrashLOG_DEBUG("Updating application state to note crash.");
         sentrycrashstate_notifyAppCrash();

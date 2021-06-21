@@ -49,6 +49,7 @@
 //#define SentryCrashLogger_LocalLevel TRACE
 #include "SentryCrashLogger.h"
 
+#include "SentrySDKc.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
@@ -1722,19 +1723,19 @@ sentrycrashreport_writeStandardReport(
 void
 sentrycrashreport_setUserInfoJSON(const char *const userInfoJSON)
 {
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    SentryCrashLOG_TRACE("set userInfoJSON to %p", userInfoJSON);
-
-    pthread_mutex_lock(&mutex);
-    if (g_userInfoJSON != NULL) {
-        free((void *)g_userInfoJSON);
-    }
-    if (userInfoJSON == NULL) {
-        g_userInfoJSON = NULL;
-    } else {
-        g_userInfoJSON = strdup(userInfoJSON);
-    }
-    pthread_mutex_unlock(&mutex);
+    //    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    //    SentryCrashLOG_TRACE("set userInfoJSON to %p", userInfoJSON);
+    //
+    //    pthread_mutex_lock(&mutex);
+    //    if (g_userInfoJSON != NULL) {
+    //        free((void *)g_userInfoJSON);
+    //    }
+    //    if (userInfoJSON == NULL) {
+    //        g_userInfoJSON = NULL;
+    //    } else {
+    g_userInfoJSON = strdup(userInfoJSON);
+    //    }
+    //    pthread_mutex_unlock(&mutex);
 }
 
 void

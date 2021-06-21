@@ -246,7 +246,7 @@ SentryCrashIntegration ()
                     userInfo[@"release"] = self.options.releaseName;
                     userInfo[@"dist"] = self.options.dist;
 
-                    [SentryCrash.sharedInstance setUserInfo:userInfo];
+                    //                    [SentryCrash.sharedInstance setUserInfo:userInfo];
                 }];
             }];
         }];

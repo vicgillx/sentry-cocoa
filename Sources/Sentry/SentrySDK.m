@@ -376,4 +376,10 @@ static NSObject *appStartMeasurementLock;
 
 @end
 
+void
+sentrycrash_serializeScope(void)
+{
+    [SentryCrash.sharedInstance setUserInfo:[currentHub.scope serialize]];
+}
+
 NS_ASSUME_NONNULL_END
