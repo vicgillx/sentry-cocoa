@@ -12,6 +12,8 @@ class SentryCrashIntegrationTests: XCTestCase {
         let hub: SentryHub
         let options: Options
         let sentryCrash: TestSentryCrashAdapter
+        let releaseName = "1.0.0"
+        let dist = "14G60"
         
         init() {
             sentryCrash = TestSentryCrashAdapter.sharedInstance()
@@ -21,6 +23,7 @@ class SentryCrashIntegrationTests: XCTestCase {
             options = Options()
             options.dsn = SentryCrashIntegrationTests.dsnAsString
             options.releaseName = TestData.appState.releaseName
+            options.dist = dist
             
             let client = Client(options: options)
             hub = TestHub(client: client, andScope: nil)
@@ -68,12 +71,10 @@ class SentryCrashIntegrationTests: XCTestCase {
     
     // Test for GH-581
     func testReleaseNamePassedToSentryCrash() {
-        let releaseName = "1.0.0"
-        let dist = "14G60"
         // The start of the SDK installs all integrations
         SentrySDK.start(options: ["dsn": SentryCrashIntegrationTests.dsnAsString,
-                                  "release": releaseName,
-                                  "dist": dist]
+                                  "release": fixture.releaseName,
+                                  "dist": fixture.dist]
         )
         
         // To test this properly we need SentryCrash and SentryCrashIntegration installed and registered on the current hub of the SDK.
@@ -85,8 +86,65 @@ class SentryCrashIntegrationTests: XCTestCase {
         
         let instance = SentryCrash.sharedInstance()
         let userInfo = (instance?.userInfo ?? ["": ""]) as Dictionary
-        assertUserInfoField(userInfo: userInfo, key: "release", expected: releaseName)
-        assertUserInfoField(userInfo: userInfo, key: "dist", expected: dist)
+        assertUserInfoField(userInfo: userInfo, key: "release", expected: fixture.releaseName)
+        assertUserInfoField(userInfo: userInfo, key: "dist", expected: fixture.dist)
+    }
+    
+    func testSetUserInfo_SyncsScopeChanges_ToSentryCrash() throws {
+        SentrySDK.setCurrentHub(fixture.hub)
+        
+        let sut = fixture.getSut()
+        sut.install(with: fixture.options)
+        
+        let tags = ["tag1": "tag1", "tag2": "tag2"]
+        
+        SentrySDK.configureScope { scope in
+            scope.setTags(tags)
+            scope.setExtras(["extra1": "extra1", "extra2": "extra2"])
+            scope.setFingerprint(["finger", "print"])
+            scope.setContext(value: ["context": 1], key: "context")
+            scope.setEnvironment("Production")
+            scope.setLevel(SentryLevel.fatal)
+            
+            let crumb1 = TestData.crumb
+            crumb1.message = "Crumb 1"
+            scope.add(crumb1)
+            
+            let crumb2 = TestData.crumb
+            crumb2.message = "Crumb 2"
+            scope.add(crumb2)
+        }
+        
+        SentrySDK.setUser(TestData.user)
+        
+        let result = getUserInfoJSON()
+        let data = result.data(using: .utf8)!
+        var dict = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+        
+        SentrySDK.currentHub().scope.serialize()
+        
+        dict.removeValue(forKey: "release")
+        dict.removeValue(forKey: "dist")
+        
+        XCTAssertEqual(tags, dict["tags"] as? [String: String])
+        
+        let dictData = try JSONSerialization.data(withJSONObject: dict)
+   
+        let dictString = String(data: dictData, encoding: .utf8)
+        
+        XCTAssertNotNil(dictString)
+        
+        XCTAssertNotNil(dict)
+    }
+    
+    private func getUserInfoJSON() -> String {
+        var jsonPointer = UnsafeMutablePointer<CChar>?(nil)
+        sentrycrashreport_getUserInfoJSON(&jsonPointer)
+        let json = String(cString: jsonPointer ?? UnsafeMutablePointer<CChar>.allocate(capacity: 0))
+        
+        jsonPointer?.deallocate()
+        
+        return json
     }
     
     func testEndSessionAsCrashed_WithCurrentSession() {
