@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - ci/app-store-connect
 
 jobs:
 
