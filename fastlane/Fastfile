@@ -95,7 +95,7 @@ platform :ios do
       "upload-dif", 
       "--org", "sentry-sdks", 
       "--project", "sentry-cocoa", 
-      ".")
+      "iOS-Swift.xcarchive")
   end
 
 end
