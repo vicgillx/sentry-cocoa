@@ -89,7 +89,7 @@ platform :ios do
       skip_waiting_for_build_processing: true
     )
 
-    sh("sentry-cli", "upload-dif")
+    sh("sentry-cli", "upload-dif", "iOS-Swift.xcarchive")
   end
 
 end
