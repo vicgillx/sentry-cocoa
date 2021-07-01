@@ -85,20 +85,11 @@ platform :ios do
       archive_path: "iOS-Swift"
     )
     
-    testflight
-
-    download_dsyms(
-      username: ENV["FASTLANE_USER"],
-      wait_for_dsym_processing: true,
-      build_number: ENV["FASTLANE_BUNDLE_VERSION"]
+    testflight(
+      skip_waiting_for_build_processing: true
     )
 
-    sentry_upload_dsym(
-      auth_token: ENV["SENTRY_AUTH_TOKEN"],
-      org_slug: 'sentry-sdks',
-      project_slug: 'sentry-cocoa',
-      symbol_maps: 'iOS-Swift.xcarchive/BCSymbolMaps/'
-    )
+    sh("sentry-cli", "upload-dif")
   end
 
 end
