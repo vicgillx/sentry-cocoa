@@ -89,13 +89,17 @@ platform :ios do
       skip_waiting_for_build_processing: true
     )
 
-    sh(
+    # Unfortunetaly we need to change the dir, see https://docs.fastlane.tools/advanced/fastlane/#directory-behavior
+    Dir.chdir("..") do
+      sh(
       "sentry-cli", 
-      "----auth-token", ENV["SENTRY_AUTH_TOKEN"],
+      "--auth-token", ENV["SENTRY_AUTH_TOKEN"],
       "upload-dif", 
       "--org", "sentry-sdks", 
       "--project", "sentry-cocoa", 
-      "iOS-Swift.xcarchive")
+      ".")
+    end
+    
   end
 
 end
