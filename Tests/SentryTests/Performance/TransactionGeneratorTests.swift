@@ -13,32 +13,37 @@ class TransactionGeneratorTests: XCTestCase {
         }
     }
 
-    func tesGenerateTransactions() {
+    func testGenerateTransactions() {
         transactionWithChildren()
         
-        transactionWithErrorAndScope()
+//        transactionWithErrorAndScope()
         
-        peformanceOfTransactions()
+//        peformanceOfTransactions()
+        
+        // Wait to flush out transactions
+        delayNonBlocking(timeout: 5)
     }
     
     private func transactionWithChildren() {
-        let transaction = SentrySDK.startTransaction(name: "Generated With Children", operation: "Some Operation")
-        
-        let search = transaction.startChild(operation: "Search")
-        
+let transaction = SentrySDK.startTransaction(name: "Load Messages", operation: "ui.load")
+
+let getMessagesSpan = transaction.startChild(operation: "http", description: "GET /my/api/messages")
+getMessages()
+getMessagesSpan.finish()
+
+let renderMessagesSpan = transaction.startChild(operation: "ui", description: "Render Messages")
+renderMessages()
+renderMessagesSpan.finish()
+
+transaction.finish()
+    }
+    
+    private func getMessages() {
         delayNonBlocking(timeout: 0.02)
-        
-        searchSpans(span: search)
-        
+    }
+
+    private func renderMessages() {
         delayNonBlocking(timeout: 0.01)
-        
-        search.finish()
-        let checkout = transaction.startChild(operation: "Checkout")
-        
-        checkoutSpans(span: checkout)
-        
-        checkout.finish()
-        transaction.finish()
     }
     
     private func searchSpans(span: Span) {
@@ -125,8 +130,5 @@ class TransactionGeneratorTests: XCTestCase {
             delayNonBlocking(timeout: 0.001)
             transaction.finish()
         }
-        
-        // Wait to flush out transactions
-        delayNonBlocking(timeout: 5)
     }
 }
