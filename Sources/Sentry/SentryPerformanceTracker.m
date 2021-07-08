@@ -8,6 +8,7 @@
 #import "SentrySpanProtocol.h"
 #import "SentryTracer.h"
 #import "SentryTransactionContext.h"
+#import "SentryScope+Private.h"
 
 @interface
 SentryPerformanceTracker ()
@@ -111,6 +112,9 @@ SentryPerformanceTracker ()
     if (toActiveSpan != nil) {
         @synchronized(self.activeStack) {
             [self.activeStack addObject:toActiveSpan];
+            [SentrySDK configureScope:^(SentryScope *_Nonnull scope) {
+                [scope setSpan:toActiveSpan];
+            }];
         }
     }
 }

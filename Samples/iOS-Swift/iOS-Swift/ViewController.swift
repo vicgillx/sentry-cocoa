@@ -4,6 +4,7 @@ import UIKit
 class ViewController: UIViewController {
     
     @IBOutlet weak var dsnTextField: UITextField!
+    @IBOutlet weak var imageView: UIImageView!
     
     private let dispatchQueue = DispatchQueue(label: "ViewController")
 
@@ -24,7 +25,6 @@ class ViewController: UIViewController {
             if let data = "hello".data(using: .utf8) {
                 scope.add(Attachment(data: data, filename: "log.txt"))
             }
-            
         }
         // Also works
         let user = Sentry.User(userId: "1")
@@ -40,6 +40,45 @@ class ViewController: UIViewController {
             }
         }
         
+        delayNonBlocking(timeout: 0.1)
+    }
+    
+    func delayNonBlocking(timeout: Double = 0.2) {
+        let group = DispatchGroup()
+        group.enter()
+        let queue = DispatchQueue(label: "delay", qos: .background, attributes: [])
+        
+        queue.asyncAfter(deadline: .now() + timeout) {
+            group.leave()
+        }
+        
+        group.wait()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        guard let imgUrl = URL(string: "https://sentry-brand.storage.googleapis.com/sentry-logo-black.png") else {
+            return
+        }
+        
+        let dataTask = URLSession.shared.dataTask(with: imgUrl) { (data, _, error) in
+            if let err = error {
+                
+            } else if let image = data {
+                self.imageView.image = UIImage(data: image)
+            }
+        }
+        
+        delayNonBlocking(timeout: 1)
+        dataTask.resume()
+        
+        let dbSpan = SentrySDK.span?.startChild(operation: "db", description: "Load Entries")
+        
+        let queue = DispatchQueue(label: "delay", qos: .background, attributes: [])
+        
+        queue.asyncAfter(deadline: .now() + 0.01) {
+            dbSpan?.finish()
+        }
     }
     
     @IBAction func addBreadcrumb(_ sender: Any) {
@@ -47,6 +86,19 @@ class ViewController: UIViewController {
         crumb.message = "tapped addBreadcrumb"
         crumb.type = "user"
         SentrySDK.addBreadcrumb(crumb: crumb)
+        
+        guard let imgUrl = URL(string: "https://img.youtube.com/vi/iiNvVq7JSVs/0.jpg") else {
+            return
+        }
+        
+        let dataTask = URLSession.shared.dataTask(with: imgUrl) { (data, _, error) in
+            if let err = error {
+                
+            } else if let image = data {
+                self.imageView.image = UIImage(data: image)
+            }
+        }
+        dataTask.resume()
     }
     
     @IBAction func captureMessage(_ sender: Any) {
