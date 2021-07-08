@@ -39,8 +39,6 @@ class ViewController: UIViewController {
                 self.dsnTextField.backgroundColor = UIColor.systemGreen
             }
         }
-        
-        delayNonBlocking(timeout: 0.1)
     }
     
     func delayNonBlocking(timeout: Double = 0.2) {
@@ -68,15 +66,14 @@ class ViewController: UIViewController {
                 self.imageView.image = UIImage(data: image)
             }
         }
-        
-        delayNonBlocking(timeout: 1)
+    
         dataTask.resume()
         
         let dbSpan = SentrySDK.span?.startChild(operation: "db", description: "Load Entries")
         
         let queue = DispatchQueue(label: "delay", qos: .background, attributes: [])
         
-        queue.asyncAfter(deadline: .now() + 0.01) {
+        queue.asyncAfter(deadline: .now() + 0.001) {
             dbSpan?.finish()
         }
     }
