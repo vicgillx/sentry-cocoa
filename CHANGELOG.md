@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased 
+
+## 7.2.0-beta.5
+
+- perf: Scope sync to SentryCrash (#1193)
+- fix: Compile failure with C99 (#1224)
+
+## 7.2.0-beta.4
+
+- fix: Add viewAppearing to UIViewController spans (#1202)
+
+## 7.2.0-beta.3
+
+- feat: Add automatic http request performance monitoring (#1178)
+- feat: Add clearAttachments to Scope (#1195)
+
 ## 7.2.0-beta.2
 
 - feat: Add flag stichAsyncCode (#1172)
