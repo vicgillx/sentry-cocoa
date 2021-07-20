@@ -74,7 +74,7 @@ platform :ios do
 		build_app(
       workspace: "Sentry.xcworkspace",
       scheme: "iOS-Swift",
-			include_bitcode: true,
+			include_bitcode: false,
       include_symbols: false,
 			export_options: {
 				method: "app-store",
