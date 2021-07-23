@@ -1,4 +1,6 @@
 #import "SentryNetworkTracker.h"
+#import "SentryHttpInterceptor+Private.h"
+#import "SentryLog.h"
 #import "SentryOptions+Private.h"
 #import "SentryPerformanceTracker.h"
 #import "SentrySDK+Private.h"
@@ -57,9 +59,11 @@ SentryNetworkTracker ()
         }
     }
 
-    NSURL *url = [[sessionTask currentRequest] URL];
-
-    if (url == nil || ![self isTaskSupported:sessionTask])
+    // We need to check if this request was created by SentryHTTPInterceptor so we don't end up with
+    // two spans for the same request.
+    NSNumber *intercepted = [NSURLProtocol propertyForKey:SENTRY_INTERCEPTED_REQUEST
+                                                inRequest:[sessionTask currentRequest]];
+    if (intercepted != nil && [intercepted boolValue])
         return;
 
     // SDK not enabled no need to continue
@@ -67,16 +71,15 @@ SentryNetworkTracker ()
         return;
     }
 
+    NSURL *url = [[sessionTask currentRequest] URL];
+
+    if (url == nil || ![self isTaskSupported:sessionTask])
+        return;
+
     // Don't measure requests to Sentry's backend
     NSURL *apiUrl = [NSURL URLWithString:SentrySDK.options.dsn];
     if ([url.host isEqualToString:apiUrl.host] && [url.path containsString:apiUrl.path])
         return;
-
-    NSString *statePath = NSStringFromSelector(@selector(state));
-    [sessionTask addObserver:self
-                  forKeyPath:statePath
-                     options:NSKeyValueObservingOptionNew
-                     context:nil];
 
     SentrySpanId *spanId =
         [self.tracker startSpanWithName:[NSString stringWithFormat:@"%@ %@",
@@ -85,6 +88,12 @@ SentryNetworkTracker ()
 
     objc_setAssociatedObject(sessionTask, &SENTRY_NETWORK_REQUEST_TRACKER_SPAN_ID, spanId,
         OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+
+    NSString *statePath = NSStringFromSelector(@selector(state));
+    [sessionTask addObserver:self
+                  forKeyPath:statePath
+                     options:NSKeyValueObservingOptionNew
+                     context:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -95,8 +104,14 @@ SentryNetworkTracker ()
     if ([keyPath isEqualToString:NSStringFromSelector(@selector(state))]) {
         NSURLSessionTask *sessionTask = object;
         if (sessionTask.state != NSURLSessionTaskStateRunning) {
-            SentrySpanId *spanId
-                = objc_getAssociatedObject(sessionTask, &SENTRY_NETWORK_REQUEST_TRACKER_SPAN_ID);
+            SentrySpanId *spanId;
+            @synchronized(sessionTask) {
+                spanId = objc_getAssociatedObject(
+                    sessionTask, &SENTRY_NETWORK_REQUEST_TRACKER_SPAN_ID);
+                // We'll just go through once
+                objc_setAssociatedObject(sessionTask, &SENTRY_NETWORK_REQUEST_TRACKER_SPAN_ID, nil,
+                    OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            }
 
             if (spanId != nil) {
                 id<SentrySpan> span = [self.tracker getSpan:spanId];
@@ -108,9 +123,10 @@ SentryNetworkTracker ()
                 }
 
                 [self.tracker finishSpan:spanId withStatus:[self statusForSessionTask:sessionTask]];
+                [sessionTask removeObserver:self forKeyPath:NSStringFromSelector(@selector(state))];
+                [SentryLog logWithMessage:@"Finished HTTP span for sessionTask"
+                                 andLevel:kSentryLevelDebug];
             }
-
-            [sessionTask removeObserver:self forKeyPath:NSStringFromSelector(@selector(state))];
         }
     }
 }

@@ -44,12 +44,11 @@ SentryOptions ()
         self.stitchAsyncCode = NO;
         self.maxAttachmentSize = 20 * 1024 * 1024;
         self.sendDefaultPii = NO;
-        self.enableAutoUIPerformanceTracking = YES;
-        self.enableAutoHttpRequestTracking = YES;
+        self.enableAutoPerformanceTracking = YES;
         _defaultTracesSampleRate = nil;
         self.tracesSampleRate = _defaultTracesSampleRate;
 
-        // Use the name of the bundle’s executable file as inAppInclude, so SentryFrameInAppLogic
+        // Use the name of the bundle’s executable file as inAppInclude, so SentryInAppLogic
         // marks frames coming from there as inApp. With this approach, the SDK marks public
         // frameworks such as UIKitCore, CoreFoundation, GraphicsServices, and so forth, as not
         // inApp. For private frameworks, such as Sentry, dynamic and static frameworks differ.
@@ -211,13 +210,8 @@ SentryOptions ()
         self.sendDefaultPii = [options[@"sendDefaultPii"] boolValue];
     }
 
-    if (nil != options[@"enableAutoUIPerformanceTracking"]) {
-        self.enableAutoUIPerformanceTracking =
-            [options[@"enableAutoUIPerformanceTracking"] boolValue];
-    }
-
-    if (nil != options[@"enableAutoHttpRequestTracking"]) {
-        self.enableAutoHttpRequestTracking = [options[@"enableAutoHttpRequestTracking"] boolValue];
+    if (nil != options[@"enableAutoPerformanceTracking"]) {
+        self.enableAutoPerformanceTracking = [options[@"enableAutoPerformanceTracking"] boolValue];
     }
 
     NSNumber *tracesSampleRate = options[@"tracesSampleRate"];

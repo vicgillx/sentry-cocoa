@@ -5,15 +5,11 @@
 #import <Foundation/Foundation.h>
 #import <SentryAppStartTracker.h>
 #import <SentryAppState.h>
-#import <SentryClient+Private.h>
 #import <SentryCurrentDateProvider.h>
 #import <SentryDispatchQueueWrapper.h>
-#import <SentryFileManager.h>
-#import <SentryHub.h>
 #import <SentryInternalNotificationNames.h>
 #import <SentryLog.h>
 #import <SentrySDK+Private.h>
-#import <SentrySpan.h>
 
 #if SENTRY_HAS_UIKIT
 #    import <UIKit/UIKit.h>
@@ -53,12 +49,20 @@ SentryAppStartTracker ()
         self.sysctl = sysctl;
         self.previousAppState = [self.appStateManager loadCurrentAppState];
         self.wasInBackground = NO;
+
+        self.didFinishLaunchingTimestamp = [currentDateProvider date];
     }
     return self;
 }
 
 - (void)start
 {
+    // It can happen that the OS posts the didFinishLaunching notification before we register for it
+    // or we just don't receive it. In this case the didFinishLaunchingTimestamp would be nil. As
+    // the SDK should be initialized in application:didFinishLaunchingWithOptions: or in the init of
+    // @main of a SwiftUI  we set the timestamp here.
+    self.didFinishLaunchingTimestamp = [self.currentDate date];
+
     [NSNotificationCenter.defaultCenter addObserver:self
                                            selector:@selector(didFinishLaunching)
                                                name:UIApplicationDidFinishLaunchingNotification

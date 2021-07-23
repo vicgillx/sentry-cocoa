@@ -13,20 +13,15 @@ SentryPerformanceTrackingIntegration ()
 - (void)installWithOptions:(SentryOptions *)options
 {
     self.options = options;
-    if (options.enableAutoUIPerformanceTracking) {
-        [self enableUIAutomaticPerformanceTracking];
-    }
-}
-
-- (void)enableUIAutomaticPerformanceTracking
-{
+    if (options.enableAutoPerformanceTracking) {
 #if SENTRY_HAS_UIKIT
-    [SentryUIViewControllerSwizziling start];
+        [SentryUIViewControllerSwizziling startWithOptions:options];
 #else
-    [SentryLog logWithMessage:@"NO UIKit -> [SentryPerformanceTrackingIntegration "
-                              @"start] does nothing."
-                     andLevel:kSentryLevelDebug];
+        [SentryLog logWithMessage:@"NO UIKit -> [SentryPerformanceTrackingIntegration "
+                                  @"start] does nothing."
+                         andLevel:kSentryLevelDebug];
 #endif
+    }
 }
 
 @end
