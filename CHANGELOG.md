@@ -1,6 +1,22 @@
 # Changelog
 
-## Unreleased 
+## Unreleased
+
+- fix: Remove tags and data if empty for Span (#1246)
+- fix: Race Conditions in NetworkTracker (#1250)
+- fix: Don't create transactions for HTTP Requests. (#1237)
+
+## 7.2.0-beta.7
+
+- fix: Swizzle only inApp ViewControllers (#1242)
+- feat: Add Sentry Trace HTTP Header (#1213)
+- feat: Sub-millis precision for spans and events (#1234)
+- fix: Race on session task (#1233)
+
+## 7.2.0-beta.6
+ 
+- fix: ViewController swizzling before iOS 13 (#1231)
+- fix: AppStartMeasurement didFinishLaunching is nil (#1228)
 
 ## 7.2.0-beta.5
 

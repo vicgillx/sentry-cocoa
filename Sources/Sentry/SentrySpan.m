@@ -1,6 +1,7 @@
 #import "SentrySpan.h"
 #import "NSDate+SentryExtras.h"
 #import "SentryCurrentDate.h"
+#import "SentryTraceHeader.h"
 #import "SentryTracer.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -77,18 +78,26 @@ SentrySpan ()
     [self finish];
 }
 
+- (SentryTraceHeader *)toTraceHeader
+{
+    return [[SentryTraceHeader alloc] initWithTraceId:self.context.traceId
+                                               spanId:self.context.spanId
+                                              sampled:self.context.sampled];
+}
+
 - (NSDictionary *)serialize
 {
     NSMutableDictionary<NSString *, id> *mutableDictionary =
         [[NSMutableDictionary alloc] initWithDictionary:[self.context serialize]];
 
-    [mutableDictionary setValue:[self.timestamp sentry_toIso8601String] forKey:@"timestamp"];
-    [mutableDictionary setValue:[self.startTimestamp sentry_toIso8601String]
+    [mutableDictionary setValue:@(self.timestamp.timeIntervalSince1970) forKey:@"timestamp"];
+
+    [mutableDictionary setValue:@(self.startTimestamp.timeIntervalSince1970)
                          forKey:@"start_timestamp"];
 
-    if (_extras != nil) {
-        @synchronized(_extras) {
-            [mutableDictionary setValue:_extras.copy forKey:@"data"];
+    @synchronized(_extras) {
+        if (_extras.count > 0) {
+            mutableDictionary[@"data"] = _extras.copy;
         }
     }
 
