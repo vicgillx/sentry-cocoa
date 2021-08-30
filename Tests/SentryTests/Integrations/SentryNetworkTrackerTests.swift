@@ -14,6 +14,8 @@ class SentryNetworkTrackerTests: XCTestCase {
         let dateProvider = TestCurrentDateProvider()
         let options: Options
         let scope: Scope
+        let nsUrlRequest = NSURLRequest(url: SentryNetworkTrackerTests.testURL)
+        
         init() {
             options = Options()
             options.dsn = SentryNetworkTrackerTests.dsnAsString
@@ -25,6 +27,10 @@ class SentryNetworkTrackerTests: XCTestCase {
             let result = SentryNetworkTracker.sharedInstance
             result.enable()
             return result
+        }
+        
+        var mutableUrlRequest: URLRequest {
+            return URLRequest(url: SentryNetworkTrackerTests.testURL)
         }
     }
 
@@ -360,6 +366,44 @@ class SentryNetworkTrackerTests: XCTestCase {
         sut.urlSessionTaskResume(task)
 
         assertOneSpanCreated(transaction)
+    }
+    
+    func testAddTraceHeaderToRequest_RequestIsNil_RequestStaysNil() {
+        let sut = fixture.getSut()
+        XCTAssertNil(sut.addTraceHeader(to: nil))
+    }
+    
+    func testAddTraceHeaderToRequest_NoSpanOnScope_DoesNotAddTraceHeader() {
+        let sut = fixture.getSut()
+        XCTAssertNil(sut.addTraceHeader(to: fixture.mutableUrlRequest)?.allHTTPHeaderFields)
+    }
+    
+    func testAddTraceHeaderToRequest_URLIsSentry_DoesNotAddTraceHeader() {
+        SentrySDK.start(options: fixture.options)
+        
+        let sut = fixture.getSut()
+        let urlRequest = URLRequest(url: URL(string: fixture.options.dsn!)!)
+        XCTAssertNil(sut.addTraceHeader(to: urlRequest)?.allHTTPHeaderFields)
+    }
+    
+    func testAddTraceHeaderToRequest_MutableRequest_AddsTraceHeader() {
+        testTraceHeaderWithRequest(request: fixture.mutableUrlRequest as NSURLRequest)
+    }
+    
+    func testAddTraceHeaderToRequest_Request_AddsTraceHeader() {
+        testTraceHeaderWithRequest(request: fixture.nsUrlRequest)
+    }
+    
+    // We need to use NSURLRequest. When using URLRequest Swift always maps it to NSMutableURLRequest.
+    private func testTraceHeaderWithRequest(request: NSURLRequest) {
+        let sut = fixture.getSut()
+        
+        let transaction = SentrySDK.startTransaction(name: "trace-header", operation: "test", bindToScope: true)
+
+        let actual = sut.addTraceHeader(to: request as URLRequest)
+        
+        let expected = [SENTRY_TRACE_HEADER: transaction.toTraceHeader().value()]
+        XCTAssertEqual(expected, actual?.allHTTPHeaderFields)
     }
     
     // Altough we only run this test above the below specified versions, we exped the

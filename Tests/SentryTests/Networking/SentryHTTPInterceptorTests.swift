@@ -28,7 +28,7 @@ class SentryHTTPInterceptorTests: XCTestCase {
         }
         
         func getSut() -> URLRequest? {
-            return SentryNetworkTracker.sharedInstance.initializeUrlRequest(URLRequest(url: URL(string: SentryHTTPInterceptorTests.httpUrl)!))
+            return SentryNetworkTracker.sharedInstance.addTraceHeader(to: URLRequest(url: URL(string: SentryHTTPInterceptorTests.httpUrl)!))
         }
     }
     

@@ -245,14 +245,20 @@ SentryNetworkTracker ()
     return kSentrySpanStatusUndefined;
 }
 
-- (nullable NSURLRequest *)initializeUrlRequest:(nullable NSURLRequest *)request
+- (nullable NSURLRequest *)addTraceHeaderToRequest:(nullable NSURLRequest *)request
 {
-    if (request == nil || ![self isSupportedRequest:request])
+    if (request == nil) {
         return request;
+    }
+    
+    if (![self shouldAddTraceHeader:request]){
+        return request;
+    }
 
     id<SentrySpan> span = SentrySDK.currentHub.scope.span;
-    if (span == nil)
+    if (span == nil) {
         return request;
+    }
 
     if ([request isKindOfClass:[NSMutableURLRequest class]]) {
         [(NSMutableURLRequest *)request addValue:[span toTraceHeader].value
@@ -266,7 +272,7 @@ SentryNetworkTracker ()
     return request;
 }
 
-- (bool)isSupportedRequest:(NSURLRequest *)request
+- (bool)shouldAddTraceHeader:(NSURLRequest *)request
 {
     NSURL *apiUrl = [NSURL URLWithString:SentrySDK.options.dsn];
     NSURL *url = request.URL;
@@ -274,10 +280,23 @@ SentryNetworkTracker ()
     if ([url.host isEqualToString:apiUrl.host] && [url.path containsString:apiUrl.path])
         return NO;
 
-    if (SentrySDK.currentHub.scope.span == nil)
-        return NO;
-
     return ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]);
+}
+
+- (nullable NSDictionary *)addTraceHeader:(nullable NSDictionary *)headers
+{
+    id<SentrySpan> span = SentrySDK.currentHub.scope.span;
+    if (span == nil) {
+        return headers;
+    }
+
+    if (headers == nil) {
+        return @{ SENTRY_TRACE_HEADER : [span toTraceHeader].value };
+    } else {
+        NSMutableDictionary *newHeaders = [[NSMutableDictionary alloc] initWithDictionary:headers];
+        newHeaders[SENTRY_TRACE_HEADER] = [span toTraceHeader].value;
+        return [[NSDictionary alloc] initWithDictionary:newHeaders];
+    }
 }
 
 @end
