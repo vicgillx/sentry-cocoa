@@ -47,7 +47,7 @@
     }
 
     [SentryNetworkTracker.sharedInstance enable];
-    [SentryNetworkTrackingIntegration swizzleNSURLSessionConfiguration];
+//    [SentryNetworkTrackingIntegration swizzleNSURLSessionConfiguration];
     [SentryNetworkTrackingIntegration swizzleURLSessionTask];
 }
 
