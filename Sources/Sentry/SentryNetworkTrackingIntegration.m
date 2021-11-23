@@ -47,8 +47,8 @@
     }
 
     [SentryNetworkTracker.sharedInstance enable];
-//    [SentryNetworkTrackingIntegration swizzleNSURLSessionConfiguration];
-    [SentryNetworkTrackingIntegration swizzleURLSessionTask];
+    [SentryNetworkTrackingIntegration swizzleNSURLSessionConfiguration];
+//    [SentryNetworkTrackingIntegration swizzleURLSessionTask];
 }
 
 - (void)uninstall
