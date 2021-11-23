@@ -47,7 +47,7 @@
     }
 
     [SentryNetworkTracker.sharedInstance enable];
-//    [SentryNetworkTrackingIntegration swizzleNSURLSessionConfiguration];
+    [SentryNetworkTrackingIntegration swizzleNSURLSessionConfiguration];
 //    [SentryNetworkTrackingIntegration swizzleURLSessionTask];
 }
 
@@ -110,7 +110,7 @@
     if (method != nil) {
         SentrySwizzleInstanceMethod(classToSwizzle, selector, SentrySWReturnType(NSDictionary *),
             SentrySWArguments(), SentrySWReplacement({
-                return [SentryNetworkTracker.sharedInstance addTraceHeader:SentrySWCallOriginal()];
+                return SentrySWCallOriginal();
             }),
             SentrySwizzleModeOncePerClassAndSuperclasses, (void *)selector);
     }
