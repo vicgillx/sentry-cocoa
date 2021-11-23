@@ -47,7 +47,7 @@
     }
 
     [SentryNetworkTracker.sharedInstance enable];
-//    [SentryNetworkTrackingIntegration swizzleNSURLSessionConfiguration];
+    [SentryNetworkTrackingIntegration swizzleNSURLSessionConfiguration];
     [SentryNetworkTrackingIntegration swizzleURLSessionTask];
 }
 
@@ -71,14 +71,14 @@
     for (Class classToSwizzle in classesToSwizzle) {
         SentrySwizzleInstanceMethod(classToSwizzle, resumeSelector, SentrySWReturnType(void),
             SentrySWArguments(), SentrySWReplacement({
-//                [SentryNetworkTracker.sharedInstance urlSessionTaskResume:self];
+                [SentryNetworkTracker.sharedInstance urlSessionTaskResume:self];
                 SentrySWCallOriginal();
             }),
             SentrySwizzleModeOncePerClassAndSuperclasses, (void *)resumeSelector);
 
         SentrySwizzleInstanceMethod(classToSwizzle, setStateSelector, SentrySWReturnType(void),
             SentrySWArguments(NSURLSessionTaskState state), SentrySWReplacement({
-//                [SentryNetworkTracker.sharedInstance urlSessionTask:self setState:state];
+                [SentryNetworkTracker.sharedInstance urlSessionTask:self setState:state];
                 SentrySWCallOriginal(state);
             }),
             SentrySwizzleModeOncePerClassAndSuperclasses, (void *)setStateSelector);
@@ -110,7 +110,7 @@
     if (method != nil) {
         SentrySwizzleInstanceMethod(classToSwizzle, selector, SentrySWReturnType(NSDictionary *),
             SentrySWArguments(), SentrySWReplacement({
-                return SentrySWCallOriginal();
+                return [SentryNetworkTracker.sharedInstance addTraceHeader:SentrySWCallOriginal()];
             }),
             SentrySwizzleModeOncePerClassAndSuperclasses, (void *)selector);
     }
