@@ -9,7 +9,7 @@ class SentryClientTest: XCTestCase {
     private static let dsn = TestConstants.dsnAsString(username: "SentryClientTest")
 
     private class Fixture {
-        let transport = TestTransport()
+        let transport: TestTransportAdapter
         
         let debugImageBuilder = SentryDebugImageProvider()
         let threadInspector = TestThreadInspector.instance
@@ -45,6 +45,8 @@ class SentryClientTest: XCTestCase {
             fileManager = try! SentryFileManager(options: options, andCurrentDateProvider: TestCurrentDateProvider())
             
             transaction = Transaction(trace: trace, children: [])
+            
+            transport = TestTransportAdapter(transport: TestTransport(), options: options)
         }
 
         func getSut(configureOptions: (Options) -> Void = { _ in }) -> Client {
@@ -55,7 +57,7 @@ class SentryClientTest: XCTestCase {
                 ])
                 configureOptions(options)
 
-                client = Client(options: options, transport: transport, fileManager: fileManager, threadInspector: threadInspector, random: random)
+                client = Client(options: options, transportAdapter: transport, fileManager: fileManager, threadInspector: threadInspector, random: random)
             } catch {
                 XCTFail("Options could not be created")
             }
