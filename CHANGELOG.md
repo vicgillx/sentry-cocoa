@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 7.14.0-beta.0
 
 - fix: Remove authenticated pointer stripping for iOS backtraces (#1757)
 
