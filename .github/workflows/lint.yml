@@ -8,6 +8,9 @@ on:
       - 'Tests/**'
       - 'test-server/**'
       - 'Samples/**'
+      - '.github/workflows/lint.yml'
+      - 'scripts/ci-select-xcode.sh'
+      - 'scripts/no-changes-in-high-risk-files.sh'
 
   pull_request:
     paths:
@@ -15,37 +18,44 @@ on:
       - 'Tests/**'
       - 'test-server/**'
       - 'Samples/**'
+      - '.github/workflows/lint.yml'
+      - 'scripts/ci-select-xcode.sh'
+      - 'scripts/no-changes-in-high-risk-files.sh'
 
 jobs:
   swift-lint:
     name: Swift Lint
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run SwiftLint
         run: swiftlint
 
   xcode-analyze:
     name: Xcode Analyze
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: ./scripts/ci-select-xcode.sh
-      - name: Run analyze
-        run: xcodebuild analyze -workspace Sentry.xcworkspace -scheme Sentry -configuration Release CLANG_ANALYZER_OUTPUT=html CLANG_ANALYZER_OUTPUT_DIR=analyzer | xcpretty -t && [[ -z `find analyzer -name "*.html"` ]]
+      - run: make analyze
 
   validate-podspec:
     name: Validate Podspec
-    runs-on: macos-11
+    runs-on: macos-12
+    strategy:
+      matrix:
+        platform: ['ios', 'macos', 'tvos', 'watchos']
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - run: ./scripts/ci-select-xcode.sh
       - name: Validate Podspec
-        run: pod lib lint --verbose
+        run: pod lib lint --verbose --platforms=${{ matrix.platform }}
         shell: sh
 
   validate-high-risk-files:
     name: No changes in high risk files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: ./scripts/no-changes-in-high-risk-files.sh

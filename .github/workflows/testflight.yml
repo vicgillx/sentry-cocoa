@@ -7,34 +7,27 @@ on:
       - 'Sources/**'
       - 'Samples/iOS-Swift/**'
       - '.github/workflows/testflight.yml'
+      - 'fastlane/**'
+      - 'scripts/ci-select-xcode.sh'
 
 jobs:
-
   upload_to_testflight:
     name: Build and Upload iOS-Swift to Testflight
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: ./scripts/ci-select-xcode.sh
-      - uses: ruby/setup-ruby@v1
-
-      - name: Install SentryCli
-        run: brew install getsentry/tools/sentry-cli
-
-      - name: Setup fastlane
-        run: bundle install   
+      - run: bundle install
 
       # We upload a new version to TestFlight on every commit on Master
-      # So we need to bump the bundle version each time
-      - name: Bump Bundle Version
-        env: 
-          FASTLANE_BUNDLE_VERSION: ${{ github.run_number }}
-        run: bundle exec fastlane bump_bundle_version
-        shell: sh
+      # So we need to bump the build number each time
+      - name: Bump Build Version
+        env:
+          FASTLANE_BUILD_NUMBER: ${{ github.run_number }}
+        run: bundle exec fastlane bump_build_number
 
       - name: Remove preview version suffixes
         run: bundle exec fastlane remove_preview_version_suffixes
-        shell: sh
 
       - name: Run Fastlane
         env:
@@ -50,14 +43,12 @@ jobs:
         run: |
           bundle exec fastlane build_ios_swift
           bundle exec fastlane ios_swift_to_testflight
-        shell: sh
 
       - name: Archiving
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: dSYMs 
+          name: dSYMs
           path: |
             ${{ github.workspace }}/iOS-Swift.*
             ${{ github.workspace }}/*.dSYM.zip
             ${{ github.workspace }}/dSYMs/
-
